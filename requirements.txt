@@ -1,3 +1,4 @@
+pytz
 pyrogram
 tgcrypto
 flask
