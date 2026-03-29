@@ -1236,11 +1236,6 @@ async def handle_txt2html(client: Client, message: Message):
                 "• 📄 ᴘᴅꜰ ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴜᴘᴘᴏʀᴛ\n"
                 "• ✨ ʙᴇᴀᴜᴛɪꜰᴜʟ ᴀɴɪᴍᴀᴛɪᴏɴꜱ\n"
                 "• 🧭 ꜰʟᴏᴀᴛɪɴɢ ᴄᴏɴᴛʀᴏʟꜱ\n\n"
-                f"📊 **File Statistics**\n"
-                f"├ **Total Links** : `{total_links}`\n"
-                f"├ **Videos** : `{len(videos)}`\n"
-                f"├ **PDFs** : `{len(pdfs)}`\n"
-                f"└ **Others** : `{len(others)}`\n\n"
                 f"🕒 **Generated** : `{current_time}`\n"
                 f"👤 **Converted By** : [➤ 𝕊𝔸ℂℍ𝕀ℕ 𝕊ℍ𝔸ℝ𝕄𝔸](https://t.me/Avigat1210)"
             ),
