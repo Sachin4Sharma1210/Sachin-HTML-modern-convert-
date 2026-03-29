@@ -22,14 +22,14 @@ def keep_alive():
     t.daemon = True
     t.start()
 
-# --- Bot Credentials (फोटो के अनुसार) ---
+# --- Bot Credentials ---
 API_ID = 39218807
 API_HASH = "5de693a30428272c34497419328466a1"
 BOT_TOKEN = "8441306868:AAFiY_FTmyljnldJq6da8NcESkH5hVXCiLA"
 
 bot = Client("sachin_html_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# --- Original Logic From Your bot.py ---
+# --- Original Logic ---
 
 def extract_names_and_urls(file_content):
     lines = file_content.strip().split("\n")
@@ -65,9 +65,7 @@ def obfuscate_url(url):
 def generate_html(file_name, videos, pdfs, others):
     title = os.path.splitext(file_name)[0]
     
-    # आपका हुबहू ओरिजिनल HTML डिज़ाइन (बिना किसी बदलाव के)
-    html = f"""
-<!DOCTYPE html>
+    html = f"""<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
@@ -92,39 +90,22 @@ def generate_html(file_name, videos, pdfs, others):
     <div class="brand-title">
         <a href="https://t.me/Avigat1210"><i class="fas fa-bolt"></i> SACHIN SHARMA <i class="fas fa-bolt"></i></a>
     </div>
-    
     <div class="container mb-4">
-        <div class="glass-card">
-            <div class="video-container">
-                <video id="player" playsinline controls></video>
-            </div>
-        </div>
+        <div class="glass-card"><div class="video-container"><video id="player" playsinline controls></video></div></div>
     </div>
-
     <div class="container">
         <div class="glass-card">
             <input type="text" class="search-input" id="searchInput" placeholder="Search content..." oninput="filterContent()">
-            
             <ul class="nav nav-tabs mb-3" role="tablist">
                 <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#vids">Videos ({len(videos)})</a></li>
                 <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#pfs">PDFs ({len(pdfs)})</a></li>
             </ul>
-
             <div class="tab-content">
-                <div id="vids" class="tab-pane fade show active">
-                    <div class="list-group">
-                        {"".join([f'<div class="list-group-item" onclick="playVideo(\'{obfuscate_url(u)}\')"><i class="fas fa-play-circle me-3"></i>{n}</div>' for n, u in videos])}
-                    </div>
-                </div>
-                <div id="pfs" class="tab-pane fade">
-                    <div class="list-group">
-                        {"".join([f'<div class="list-group-item" onclick="viewPDF(\'{obfuscate_url(u)}\')"><i class="fas fa-file-pdf me-3 text-danger"></i>{n}</div>' for n, u in pdfs])}
-                    </div>
-                </div>
+                <div id="vids" class="tab-pane fade show active"><div class="list-group">{"".join([f'<div class="list-group-item" onclick="playVideo(\'{obfuscate_url(u)}\')"><i class="fas fa-play-circle me-3"></i>{n}</div>' for n, u in videos])}</div></div>
+                <div id="pfs" class="tab-pane fade"><div class="list-group">{"".join([f'<div class="list-group-item" onclick="viewPDF(\'{obfuscate_url(u)}\')"><i class="fas fa-file-pdf me-3 text-danger"></i>{n}</div>' for n, u in pdfs])}</div></div>
             </div>
         </div>
     </div>
-
     <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -141,14 +122,10 @@ def generate_html(file_name, videos, pdfs, others):
             player.play();
             window.scrollTo({{ top: 0, behavior: 'smooth' }});
         }}
-        function viewPDF(enc) {{
-            window.open(`https://tempnewwebsite.classx.co.in/pdfjs/web/viewer.html?file=${{encodeURIComponent(deob(enc))}}`, '_blank');
-        }}
+        function viewPDF(enc) {{ window.open(`https://tempnewwebsite.classx.co.in/pdfjs/web/viewer.html?file=${{encodeURIComponent(deob(enc))}}`, '_blank'); }}
         function filterContent() {{
             const search = document.getElementById('searchInput').value.toLowerCase();
-            document.querySelectorAll('.list-group-item').forEach(item => {{
-                item.style.display = item.innerText.toLowerCase().includes(search) ? '' : 'none';
-            }});
+            document.querySelectorAll('.list-group-item').forEach(item => {{ item.style.display = item.innerText.toLowerCase().includes(search) ? '' : 'none'; }});
         }}
     </script>
 </body>
@@ -160,27 +137,18 @@ def generate_html(file_name, videos, pdfs, others):
 @bot.on_message(filters.document)
 async def handle_txt(client, message):
     if not message.document.file_name.endswith('.txt'): return
-    
     proc = await message.reply_text("Processing... ⏳")
     path = await message.download()
-    
-    with open(path, "r", encoding='utf-8') as f:
-        content = f.read()
-    
+    with open(path, "r", encoding='utf-8') as f: content = f.read()
     v, p, o = categorize_urls(extract_names_and_urls(content))
     html_data = generate_html(message.document.file_name, v, p, o)
-    
     out = message.document.file_name.replace(".txt", "_@Sachin4Sharma1210.html")
-    with open(out, "w", encoding='utf-8') as f:
-        f.write(html_data)
-
+    with open(out, "w", encoding='utf-8') as f: f.write(html_data)
     await message.reply_document(out, caption="✅ **OPERATED BY SACHIN SHARMA**")
-    
-    os.remove(path)
-    os.remove(out)
-    await proc.delete()
+    os.remove(path); os.remove(out); await proc.delete()
 
 if __name__ == "__main__":
     keep_alive()
     bot.run()
+
       
