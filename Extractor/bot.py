@@ -1224,10 +1224,10 @@ async def handle_txt2html(client: Client, message: Message):
         with open(html_file_path, "w", encoding='utf-8') as f:
                     f.write(html_content)
         
-        # Send the HTML file
+                # Send the HTML file
         await message.reply_document(
             document=html_file_path,
-            thumb=thumb_path if (thumb_path and (thumb_path.startswith('http') or os.path.exists(thumb_path))) else None,
+            # हमने यहाँ से thumb वाली लाइन हटा दी है ताकि एरर न आए
             caption=(
                 "<blockquote>✨ ʜᴛᴍʟ ꜰɪʟᴇ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜱᴜᴄᴄᴇꜱꜰᴜʟʟʏ!</blockquote>\n\n"
                 "• 🖤 ᴜʟᴛʀᴀ ᴍᴏᴅᴇʀɴ ᴅᴀʀᴋ ᴜɪ\n"
@@ -1239,6 +1239,7 @@ async def handle_txt2html(client: Client, message: Message):
             ),
             file_name=html_file_name
         )
+
 
 
 
