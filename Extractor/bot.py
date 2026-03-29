@@ -1261,9 +1261,11 @@ async def handle_txt2html(client: Client, message: Message):
         except:
             pass
             
-    except Exception as e:
-        async def show_txt2html_help(client: Client, message: Message):
-    # सचिन भाई, यह रहा आपका बिल्कुल सटीक स्टार्ट मैसेज
+        except Exception as e:
+        await message.reply_text(f"❌ Error processing file: {str(e)}")
+
+async def show_txt2html_help(client: Client, message: Message):
+    # सचिन भाई, यह रहा आपका बिल्कुल सटीक स्टार्ट मैसेज (सही स्पेसिंग के साथ)
     help_text = (
         "**ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ :– [SACHIN SHARMA](https://t.me/Avigat1210)**\n\n"
         "<b>📝 ᴛxᴛ ➜ ʜᴛᴍʟ ᴄᴏɴᴠᴇʀᴛᴇʀ</b>\n"
@@ -1279,5 +1281,3 @@ async def handle_txt2html(client: Client, message: Message):
         text=help_text,
         disable_web_page_preview=True
     )
-
-
