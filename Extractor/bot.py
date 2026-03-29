@@ -7,7 +7,7 @@ from pyrogram import Client, filters
 from pyrogram.types import Message
 from config import CHANNEL_ID
 
-thumb_path = "Extractor/thumbs/html-5.png"
+thumb_path = "https://files.catbox.moe/mdtq9f.png"
 
 def extract_names_and_urls(file_content):
     """Extract names and URLs from the text content."""
