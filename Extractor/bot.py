@@ -1226,23 +1226,27 @@ async def handle_txt2html(client: Client, message: Message):
         
         # Send the HTML file
                 # Send the HTML file
+                # Send the HTML file
         await message.reply_document(
             document=html_file_path,
-            caption="<blockquote>✨ ʜᴛᴍʟ ꜰɪʟᴇ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜱᴜᴄᴄᴇꜱꜰᴜʟʟʏ!</blockquote>\n\n"
-            "• 🖤 ᴜʟᴛʀᴀ ᴍᴏᴅᴇʀɴ ᴅᴀʀᴋ ᴜɪ\n"
-            "• 🎬 ꜱᴍᴀʀᴛ ᴠɪᴅᴇᴏ ᴘʟᴀʏᴇʀ\n"
-            "• 📄 ᴘᴅꜰ ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴜᴘᴘᴏʀᴛ\n"
-            "• ✨ ʙᴇᴀᴜᴛɪꜰᴜʟ ᴀɴɪᴍᴀᴛɪᴏɴꜱ\n"
-            "• 🧭 ꜰʟᴏᴀᴛɪɴɢ ᴄᴏɴᴛʀᴏʟꜱ",
-            f"📊 **File Statistics**\n"
-            f"├ **Total Links** : `{total_links}`\n"
-            f"├ **Videos** : `{len(videos)}`\n"
-            f"├ **PDFs** : `{len(pdfs)}`\n"
-            f"└ **Others** : `{len(others)}`\n\n"
-            f"🕒 **Generated** : `{current_time}`\n"
-            f"👤 **Converted By** : [➤ 𝕊𝔸ℂℍ𝕀ℕ 𝕊ℍ𝔸ℝ𝕄𝔸](https://t.me/Avigat1210)"
+            caption=(
+                "<blockquote>✨ ʜᴛᴍʟ ꜰɪʟᴇ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜱᴜᴄᴄᴇꜱꜰᴜʟʟʏ!</blockquote>\n\n"
+                "• 🖤 ᴜʟᴛʀᴀ ᴍᴏᴅᴇʀɴ ᴅᴀʀᴋ ᴜɪ\n"
+                "• 🎬 ꜱᴍᴀʀᴛ ᴠɪᴅᴇᴏ ᴘʟᴀʏᴇʀ\n"
+                "• 📄 ᴘᴅꜰ ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴜᴘᴘᴏʀᴛ\n"
+                "• ✨ ʙᴇᴀᴜᴛɪꜰᴜʟ ᴀɴɪᴍᴀᴛɪᴏɴꜱ\n"
+                "• 🧭 ꜰʟᴏᴀᴛɪɴɢ ᴄᴏɴᴛʀᴏʟꜱ\n\n"
+                f"📊 **File Statistics**\n"
+                f"├ **Total Links** : `{total_links}`\n"
+                f"├ **Videos** : `{len(videos)}`\n"
+                f"├ **PDFs** : `{len(pdfs)}`\n"
+                f"└ **Others** : `{len(others)}`\n\n"
+                f"🕒 **Generated** : `{current_time}`\n"
+                f"👤 **Converted By** : [➤ 𝕊𝔸ℂℍ𝕀ℕ 𝕊ℍ𝔸ℝ𝕄𝔸](https://t.me/Avigat1210)"
+            ),
             file_name=html_file_name
         )
+
 
 
         
@@ -1258,9 +1262,10 @@ async def handle_txt2html(client: Client, message: Message):
             pass
             
     except Exception as e:
-        await message.reply_text(f"❌ Error processing file: {str(e)}")
-async def show_txt2html_help(client: Client, message: Message):
-    await message.reply_text(
+        async def show_txt2html_help(client: Client, message: Message):
+    # सचिन भाई, यह रहा आपका बिल्कुल सटीक स्टार्ट मैसेज
+    help_text = (
+        "**ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ :– [SACHIN SHARMA](https://t.me/Avigat1210)**\n\n"
         "<b>📝 ᴛxᴛ ➜ ʜᴛᴍʟ ᴄᴏɴᴠᴇʀᴛᴇʀ</b>\n"
         "<blockquote>• ᴍᴏᴅᴇʀɴ ᴅᴀʀᴋ ᴛʜᴇᴍᴇ ᴜɪ 🖤</blockquote>\n"
         "<blockquote>• ᴠɪᴅᴇᴏ ᴘʟᴀʏᴇʀ ɪɴᴛᴇɢʀᴀᴛɪᴏɴ 🎬</blockquote>\n"
@@ -1269,4 +1274,10 @@ async def show_txt2html_help(client: Client, message: Message):
         "<blockquote>• ʀᴇꜱᴘᴏɴꜱɪᴠᴇ ᴅᴇꜱɪɢɴ 📱</blockquote>\n"
         "<b>📩 ꜱᴇɴᴅ ᴀ .ᴛxᴛ ꜰɪʟᴇ ᴛᴏ ɢᴇᴛ ꜱᴛᴀʀᴛᴇᴅ!</b>"
     )
+    
+    await message.reply_text(
+        text=help_text,
+        disable_web_page_preview=True
+    )
+
 
