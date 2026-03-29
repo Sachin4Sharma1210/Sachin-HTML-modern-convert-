@@ -30,7 +30,6 @@ BOT_TOKEN = "8441306868:AAFiY_FTmyljnldJq6da8NcESkH5hVXCiLA"
 bot = Client("sachin_html_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # --- Original Logic ---
-
 def extract_names_and_urls(file_content):
     lines = file_content.strip().split("\n")
     data = []
@@ -64,18 +63,18 @@ def obfuscate_url(url):
 
 def generate_html(file_name, videos, pdfs, others):
     title = os.path.splitext(file_name)[0]
-    
-    html = f"""<!DOCTYPE html>
+    # HTML template started
+    html_code = f"""<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
     <link href="https://cdn.plyr.io/3.7.8/plyr.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
-        :root[data-theme="dark"] {{ --bs-body-bg: #0f172a; --bs-body-color: #e2e8f0; --card-bg: rgba(255, 255, 255, 0.1); --icon-color: #3b82f6; }}
+        :root[data-theme="dark"] {{ --bs-body-bg: #0f172a; --bs-body-color: #e2e8f0; --card-bg: rgba(255, 255, 255, 0.1); }}
         body {{ background: var(--bs-body-bg); color: var(--bs-body-color); font-family: 'Inter', sans-serif; }}
         .brand-title {{ font-size: 2.5rem; font-weight: 900; text-align: center; padding: 20px; }}
         .brand-title a {{ background: linear-gradient(45deg, #3b82f6, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; text-transform: uppercase; }}
@@ -83,26 +82,21 @@ def generate_html(file_name, videos, pdfs, others):
         .video-container {{ aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; }}
         .search-input {{ background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 10px; padding: 12px; width: 100%; margin-bottom: 20px; }}
         .list-group-item {{ background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; cursor: pointer; display: flex; align-items: center; padding: 12px; }}
-        .list-group-item:hover {{ background: rgba(59,130,246,0.2); transform: translateX(5px); transition: 0.3s; }}
     </style>
 </head>
 <body>
-    <div class="brand-title">
-        <a href="https://t.me/Avigat1210"><i class="fas fa-bolt"></i> SACHIN SHARMA <i class="fas fa-bolt"></i></a>
-    </div>
-    <div class="container mb-4">
-        <div class="glass-card"><div class="video-container"><video id="player" playsinline controls></video></div></div>
-    </div>
+    <div class="brand-title"><a href="https://t.me/Avigat1210">SACHIN SHARMA</a></div>
+    <div class="container mb-4"><div class="glass-card"><div class="video-container"><video id="player" playsinline controls></video></div></div></div>
     <div class="container">
         <div class="glass-card">
-            <input type="text" class="search-input" id="searchInput" placeholder="Search content..." oninput="filterContent()">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search..." oninput="filterContent()">
             <ul class="nav nav-tabs mb-3" role="tablist">
                 <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#vids">Videos ({len(videos)})</a></li>
                 <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#pfs">PDFs ({len(pdfs)})</a></li>
             </ul>
             <div class="tab-content">
-                <div id="vids" class="tab-pane fade show active"><div class="list-group">{"".join([f'<div class="list-group-item" onclick="playVideo(\'{obfuscate_url(u)}\')"><i class="fas fa-play-circle me-3"></i>{n}</div>' for n, u in videos])}</div></div>
-                <div id="pfs" class="tab-pane fade"><div class="list-group">{"".join([f'<div class="list-group-item" onclick="viewPDF(\'{obfuscate_url(u)}\')"><i class="fas fa-file-pdf me-3 text-danger"></i>{n}</div>' for n, u in pdfs])}</div></div>
+                <div id="vids" class="tab-pane fade show active"><div class="list-group">{"".join([f'<div class="list-group-item" onclick="playVideo(\'{obfuscate_url(u)}\')">{n}</div>' for n, u in videos])}</div></div>
+                <div id="pfs" class="tab-pane fade"><div class="list-group">{"".join([f'<div class="list-group-item" onclick="viewPDF(\'{obfuscate_url(u)}\')">{n}</div>' for n, u in pdfs])}</div></div>
             </div>
         </div>
     </div>
@@ -110,7 +104,7 @@ def generate_html(file_name, videos, pdfs, others):
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>
-        const player = new Plyr('#player', {{ settings: ['quality', 'speed'], speed: {{ selected: 1, options: [0.5, 1, 1.5, 2] }} }});
+        const player = new Plyr('#player');
         function deob(enc) {{ return atob(atob(enc)).slice(8); }}
         function playVideo(enc) {{
             const url = deob(enc);
@@ -120,7 +114,6 @@ def generate_html(file_name, videos, pdfs, others):
                 player.source = {{ type: 'video', sources: [{{ src: url, type: 'video/mp4' }}] }};
             }}
             player.play();
-            window.scrollTo({{ top: 0, behavior: 'smooth' }});
         }}
         function viewPDF(enc) {{ window.open(`https://tempnewwebsite.classx.co.in/pdfjs/web/viewer.html?file=${{encodeURIComponent(deob(enc))}}`, '_blank'); }}
         function filterContent() {{
@@ -130,9 +123,7 @@ def generate_html(file_name, videos, pdfs, others):
     </script>
 </body>
 </html>"""
-    return html
-
-# --- Handlers ---
+    return html_code
 
 @bot.on_message(filters.document)
 async def handle_txt(client, message):
@@ -151,4 +142,3 @@ if __name__ == "__main__":
     keep_alive()
     bot.run()
 
-      
