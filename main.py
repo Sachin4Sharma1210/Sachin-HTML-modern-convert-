@@ -29,16 +29,15 @@ BOT_TOKEN = "8441306868:AAFiY_FTmyljnldJq6da8NcESkH5hVXCiLA"
 
 bot = Client("sachin_html_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# --- Original Logic ---
+# --- Logic ---
 def extract_names_and_urls(file_content):
     lines = file_content.strip().split("\n")
     data = []
     for line in lines:
         if not line.strip(): continue
-        separators = [':', ' - ', '|', '=>', '->']
-        for separator in separators:
-            if separator in line:
-                parts = line.split(separator, 1)
+        for sep in [':', ' - ', '|', '=>', '->']:
+            if sep in line:
+                parts = line.split(sep, 1)
                 name, url = parts[0].strip(), parts[1].strip().strip('"').strip("'").strip()
                 if "media-cdn.classplusapp.com" in url:
                     url = f"https://api.extractor.workers.dev/player?url={url}"
@@ -47,29 +46,28 @@ def extract_names_and_urls(file_content):
     return data
 
 def categorize_urls(urls):
-    videos, pdfs, others = [], [], []
+    videos, pdfs = [], []
     v_pat = [r'\.m3u8', r'\.mp4', r'media-cdn', r'api\.extractor', r'youtube', r'youtu\.be']
     p_pat = [r'\.pdf', r'/pdf/', r'drive\.google', r'docs\.google']
     for name, url in urls:
         if any(re.search(p, url, re.IGNORECASE) for p in v_pat): videos.append((name, url))
         elif any(re.search(p, url, re.IGNORECASE) for p in p_pat): pdfs.append((name, url))
-        else: others.append((name, url))
-    return videos, pdfs, others
+    return videos, pdfs
 
 def obfuscate_url(url):
     salt = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
-    encoded = base64.b64encode(base64.b64encode((salt + url).encode()).decode().encode()).decode()
-    return encoded
+    return base64.b64encode(base64.b64encode((salt + url).encode()).decode().encode()).decode()
 
-def generate_html(file_name, videos, pdfs, others):
+def generate_html(file_name, videos, pdfs):
     title = os.path.splitext(file_name)[0]
-    # HTML template started
-    html_code = f"""<!DOCTYPE html>
+    
+    # यहाँ हमने f-string के बजाय .format() का उपयोग किया है ताकि बैकस्लैश एरर न आए
+    html_template = """<!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title}</title>
+    <title>{0}</title>
     <link href="https://cdn.plyr.io/3.7.8/plyr.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
@@ -80,7 +78,6 @@ def generate_html(file_name, videos, pdfs, others):
         .brand-title a {{ background: linear-gradient(45deg, #3b82f6, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-decoration: none; text-transform: uppercase; }}
         .glass-card {{ background: var(--card-bg); backdrop-filter: blur(16px); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); padding: 15px; margin: 10px; }}
         .video-container {{ aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; }}
-        .search-input {{ background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 10px; padding: 12px; width: 100%; margin-bottom: 20px; }}
         .list-group-item {{ background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 8px; cursor: pointer; display: flex; align-items: center; padding: 12px; }}
     </style>
 </head>
@@ -89,14 +86,13 @@ def generate_html(file_name, videos, pdfs, others):
     <div class="container mb-4"><div class="glass-card"><div class="video-container"><video id="player" playsinline controls></video></div></div></div>
     <div class="container">
         <div class="glass-card">
-            <input type="text" class="search-input" id="searchInput" placeholder="Search..." oninput="filterContent()">
             <ul class="nav nav-tabs mb-3" role="tablist">
-                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#vids">Videos ({len(videos)})</a></li>
-                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#pfs">PDFs ({len(pdfs)})</a></li>
+                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#vids">Videos</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#pfs">PDFs</a></li>
             </ul>
             <div class="tab-content">
-                <div id="vids" class="tab-pane fade show active"><div class="list-group">{"".join([f'<div class="list-group-item" onclick="playVideo(\'{obfuscate_url(u)}\')">{n}</div>' for n, u in videos])}</div></div>
-                <div id="pfs" class="tab-pane fade"><div class="list-group">{"".join([f'<div class="list-group-item" onclick="viewPDF(\'{obfuscate_url(u)}\')">{n}</div>' for n, u in pdfs])}</div></div>
+                <div id="vids" class="tab-pane fade show active"><div class="list-group">{1}</div></div>
+                <div id="pfs" class="tab-pane fade"><div class="list-group">{2}</div></div>
             </div>
         </div>
     </div>
@@ -116,14 +112,14 @@ def generate_html(file_name, videos, pdfs, others):
             player.play();
         }}
         function viewPDF(enc) {{ window.open(`https://tempnewwebsite.classx.co.in/pdfjs/web/viewer.html?file=${{encodeURIComponent(deob(enc))}}`, '_blank'); }}
-        function filterContent() {{
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            document.querySelectorAll('.list-group-item').forEach(item => {{ item.style.display = item.innerText.toLowerCase().includes(search) ? '' : 'none'; }});
-        }}
     </script>
 </body>
 </html>"""
-    return html_code
+
+    v_html = "".join([f'<div class="list-group-item" onclick="playVideo(\'{obfuscate_url(u)}\')">{n}</div>' for n, u in videos])
+    p_html = "".join([f'<div class="list-group-item" onclick="viewPDF(\'{obfuscate_url(u)}\')">{n}</div>' for n, u in pdfs])
+    
+    return html_template.format(title, v_html, p_html)
 
 @bot.on_message(filters.document)
 async def handle_txt(client, message):
@@ -131,8 +127,8 @@ async def handle_txt(client, message):
     proc = await message.reply_text("Processing... ⏳")
     path = await message.download()
     with open(path, "r", encoding='utf-8') as f: content = f.read()
-    v, p, o = categorize_urls(extract_names_and_urls(content))
-    html_data = generate_html(message.document.file_name, v, p, o)
+    v, p = categorize_urls(extract_names_and_urls(content))
+    html_data = generate_html(message.document.file_name, v, p)
     out = message.document.file_name.replace(".txt", "_@Sachin4Sharma1210.html")
     with open(out, "w", encoding='utf-8') as f: f.write(html_data)
     await message.reply_document(out, caption="✅ **OPERATED BY SACHIN SHARMA**")
