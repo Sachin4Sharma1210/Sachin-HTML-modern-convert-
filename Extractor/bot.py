@@ -1222,13 +1222,12 @@ async def handle_txt2html(client: Client, message: Message):
         html_file_path = os.path.join(os.path.dirname(file_path), html_file_name)
         
         with open(html_file_path, "w", encoding='utf-8') as f:
-            f.write(html_content)
+                    f.write(html_content)
         
         # Send the HTML file
-                # Send the HTML file
-                # Send the HTML file
         await message.reply_document(
             document=html_file_path,
+            thumb=thumb_path if (thumb_path and (thumb_path.startswith('http') or os.path.exists(thumb_path))) else None,
             caption=(
                 "<blockquote>✨ ʜᴛᴍʟ ꜰɪʟᴇ ɢᴇɴᴇʀᴀᴛᴇᴅ ꜱᴜᴄᴄᴇꜱꜰᴜʟʟʏ!</blockquote>\n\n"
                 "• 🖤 ᴜʟᴛʀᴀ ᴍᴏᴅᴇʀɴ ᴅᴀʀᴋ ᴜɪ\n"
@@ -1236,11 +1235,11 @@ async def handle_txt2html(client: Client, message: Message):
                 "• 📄 ᴘᴅꜰ ᴅᴏᴡɴʟᴏᴀᴅ ꜱᴜᴘᴘᴏʀᴛ\n"
                 "• ✨ ʙᴇᴀᴜᴛɪꜰᴜʟ ᴀɴɪᴍᴀᴛɪᴏɴꜱ\n"
                 "• 🧭 ꜰʟᴏᴀᴛɪɴɢ ᴄᴏɴᴛʀᴏʟꜱ\n\n"
-                f"🕒 **Generated** : `{current_time}`\n"
-                f"👤 **Converted By** : [➤ 𝕊𝔸ℂℍ𝕀ℕ 𝕊ℍ𝔸ℝ𝕄𝔸](https://t.me/Avigat1210)"
+                "👤 **Converted By** : [➤ 𝕊𝔸ℂℍ𝕀ℕ 𝕊ℍ𝔸ℝ𝕄𝔸](https://t.me/Avigat1210)"
             ),
             file_name=html_file_name
         )
+
 
 
 
