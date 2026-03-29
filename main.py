@@ -113,30 +113,43 @@ def handle_txt_file(message):
     
     try:
         file_info = bot.get_file(message.document.file_id)
-        downloaded_file = bot.download_file(file_info.file_path)
-        
-        file_base = message.document.file_name.replace(".txt", "")
-        txt_path = f"{file_base}.txt"
-        html_path = f"{file_base}.html"
+import asyncio
+import importlib
+import signal
+from pyrogram import idle
+from Extractor.modules import ALL_MODULES
 
-        with open(txt_path, 'wb') as f:
-            f.write(downloaded_file)
+loop = asyncio.get_event_loop()
 
-        txt_to_html(txt_path, html_path)
+# Graceful shutdown
+should_exit = asyncio.Event()
 
-        with open(html_path, 'rb') as f:
-            bot.send_document(message.chat.id, f, caption=f"✅ **{file_base}** Ready!\n\n**OPERATED BY SACHIN SHARMA**")
+def shutdown():
+    print("Shutting down gracefully...")
+    should_exit.set()  # triggers exit from idle
 
-        os.remove(txt_path)
-        os.remove(html_path)
-        bot.delete_message(message.chat.id, wait_msg.message_id)
+signal.signal(signal.SIGTERM, lambda s, f: loop.create_task(should_exit.set()))
+signal.signal(signal.SIGINT, lambda s, f: loop.create_task(should_exit.set()))
 
-    except Exception as e:
-        bot.send_message(message.chat.id, f"❌ Error: {str(e)}")
+async def sumit_boot():
+    for all_module in ALL_MODULES:
+        importlib.import_module("Extractor.modules." + all_module)
 
-# --- Bot Polling ---
+    print("» ʙᴏᴛ ᴅᴇᴘʟᴏʏ sᴜᴄᴄᴇssғᴜʟʟʏ ✨ 🎉")
+    await idle()  # keeps the bot alive
+
+    print("» ɢᴏᴏᴅ ʙʏᴇ ! sᴛᴏᴘᴘɪɴɢ ʙᴏᴛ.")
+
 if __name__ == "__main__":
-    keep_alive() # Render के लिए सर्वर
-    print("Bot is started successfully!")
-    bot.infinity_polling()
-
+    try:
+        loop.run_until_complete(sumit_boot())
+    except KeyboardInterrupt:
+        print("Interrupted by user.")
+    finally:
+        # Cancel pending tasks to avoid "destroyed but pending" error
+        pending = asyncio.all_tasks(loop)
+        for task in pending:
+            task.cancel()
+        loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+        loop.close()
+        print("Loop closed.")
