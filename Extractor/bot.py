@@ -1254,18 +1254,17 @@ async def handle_txt2html(client: Client, message: Message):
         if CHANNEL_ID:
             await client.send_document(chat_id=CHANNEL_ID, document=html_file_path)
         
-        # Cleanup
+                # Cleanup
         try:
             os.remove(file_path)
             os.remove(html_file_path)
         except:
             pass
             
-        except Exception as e:
+    except Exception as e:
         await message.reply_text(f"❌ Error processing file: {str(e)}")
 
 async def show_txt2html_help(client: Client, message: Message):
-    # सचिन भाई, यह रहा आपका बिल्कुल सटीक स्टार्ट मैसेज (सही स्पेसिंग के साथ)
     help_text = (
         "**ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ :– [SACHIN SHARMA](https://t.me/Avigat1210)**\n\n"
         "<b>📝 ᴛxᴛ ➜ ʜᴛᴍʟ ᴄᴏɴᴠᴇʀᴛᴇʀ</b>\n"
