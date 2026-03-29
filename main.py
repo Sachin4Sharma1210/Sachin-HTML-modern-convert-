@@ -1,10 +1,6 @@
-import os
-import re
-import base64
-import random
-import string
-from pyrogram import Client, filters
-from pyrogram.types import Message
+import telebot
+import os, re, base64, random, string
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from flask import Flask
 from threading import Thread
 
@@ -22,15 +18,12 @@ def keep_alive():
     t.daemon = True
     t.start()
 
-# --- Credentials ---
-API_ID = 39218807
-API_HASH = "5de693a30428272c34497419328466a1"
-BOT_TOKEN = "8441306868:AAFiY_FTmyljnldJq6da8NcESkH5hVXCiLA"
-
-bot = Client("sachin_bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+# --- Bot Config ---
+BOT_TOKEN = "8772180534:AAGJby7G5cXHLb_VYr0Hh1Bz40DwsxacHvM"
+bot = telebot.TeleBot(BOT_TOKEN)
 
 # --- Logic ---
-def extract_names_and_urls(content):
+def extract_data(content):
     data = []
     for line in content.strip().split("\n"):
         if not line.strip(): continue
@@ -45,12 +38,127 @@ def extract_names_and_urls(content):
     return data
 
 def categorize(urls):
-    v, p, o = [], [], []
-    v_p = [r'\.m3u8', r'\.mp4', r'media-cdn', r'api\.extractor', r'youtube', r'youtu\.be']
+    v, p = [], []
+    v_p = [r'\.m3u8', r'\.mp4', r'media-cdn', r'api\.extractor', r'youtube', r'youtu\.be', r'testbook']
     p_p = [r'\.pdf', r'/pdf/', r'drive\.google']
     for n, u in urls:
         if any(re.search(pat, u, re.IGNORECASE) for pat in v_p): v.append((n, u))
         elif any(re.search(pat, u, re.IGNORECASE) for pat in p_p): p.append((n, u))
+    return v, p
+
+def encode_url(url):
+    salt = ''.join(random.choices(string.ascii_letters + string.digits, k=8))
+    return base64.b64encode(base64.b64encode((salt + url).encode()).decode().encode()).decode()
+
+def generate_html(f_name, v, p):
+    title = os.path.splitext(f_name)[0]
+    
+    # आपकी भेजी हुई HTML फ़ाइल का प्रीमियम लॉजिक और डिज़ाइन
+    template = """<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>{0}</title>
+    <link href="https://cdn.plyr.io/3.7.8/plyr.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {{ --primary: #4299e1; --bg: #0f172a; --card: rgba(30, 41, 59, 0.7); }}
+        body {{ background: var(--bg); color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }}
+        .navbar-brand {{ font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #60a5fa, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; }}
+        .glass-card {{ background: var(--card); backdrop-filter: blur(12px); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }}
+        .video-wrapper {{ border-radius: 1rem; overflow: hidden; aspect-ratio: 16/9; background: #000; margin-bottom: 1.5rem; border: 1px solid rgba(255,255,255,0.05); }}
+        .search-container input {{ background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: white; border-radius: 0.75rem; padding: 0.8rem 1.2rem; }}
+        .list-group-item {{ background: rgba(255,255,255,0.03); color: white; border: 1px solid rgba(255,255,255,0.05); border-radius: 1rem !important; margin-bottom: 0.75rem; transition: 0.3s; cursor: pointer; }}
+        .list-group-item:hover {{ transform: scale(1.02); background: rgba(66, 153, 225, 0.15); }}
+        .nav-pills .nav-link.active {{ background: var(--primary); box-shadow: 0 4px 14px rgba(66, 153, 225, 0.4); }}
+    </style>
+</head>
+<body class="py-4">
+    <div class="container">
+        <div class="text-center mb-4">
+            <a href="https://t.me/Avigat1210" class="navbar-brand">⚡ SACHIN SHARMA ⚡</a>
+            <p class="text-muted small mt-2">{0}</p>
+        </div>
+
+        <div class="glass-card mb-4">
+            <div class="video-wrapper"><video id="player" playsinline controls></video></div>
+            <div class="search-container"><input type="text" id="searchInput" class="form-control" placeholder="Search topics..." oninput="filterContent()"></div>
+        </div>
+
+        <div class="glass-card">
+            <ul class="nav nav-pills nav-justified mb-4" role="tablist">
+                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#vids"><i class="fas fa-video me-2"></i>Videos ({1})</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#pdfs"><i class="fas fa-file-pdf me-2"></i>PDFs ({2})</a></li>
+            </ul>
+            <div class="tab-content">
+                <div id="vids" class="tab-pane fade show active"><div class="list-group">{3}</div></div>
+                <div id="pdfs" class="tab-pane fade"><div class="list-group">{4}</div></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+        const player = new Plyr('#player');
+        function de(s) {{ return atob(atob(s)).slice(8); }}
+        function play(s) {{
+            const u = de(s);
+            if(Hls.isSupported() && u.includes('.m3u8')) {{
+                const h = new Hls(); h.loadSource(u); h.attachMedia(document.querySelector('#player'));
+            }} else {{
+                player.source = {{ type:'video', sources:[{{src:u, type:'video/mp4'}}] }};
+            }}
+            player.play(); window.scrollTo({{top:0, behavior:'smooth'}});
+        }}
+        function view(s) {{ window.open('https://tempnewwebsite.classx.co.in/pdfjs/web/viewer.html?file=' + encodeURIComponent(de(s)), '_blank'); }}
+        function filterContent() {{
+            const s = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.list-group-item').forEach(i => {{
+                i.style.display = i.innerText.toLowerCase().includes(s) ? '' : 'none';
+            }});
+        }}
+    </script>
+</body>
+</html>"""
+
+    v_html = "".join([f'<div class="list-group-item" onclick="play(\'{encode_url(u)}\')"><i class="fas fa-play-circle me-3 text-primary"></i>{n}</div>' for n, u in v])
+    p_html = "".join([f'<div class="list-group-item" onclick="view(\'{encode_url(u)}\')"><i class="fas fa-file-pdf me-3 text-danger"></i>{n}</div>' for n, u in p])
+
+    return template.format(title, len(v), len(p), v_html, p_html)
+
+# --- Bot Handlers ---
+@bot.message_handler(commands=["start"])
+def welcome(m):
+    bot.reply_to(m, "✨ **Professional Text To HTML Bot**\n\nDirectly send me your `.txt` file.\n\n‡ 𝕮𝖗𝖊𝖆𝖙𝖊𝖉 𝕭𝖞: ➤ 𝕊𝔸ℂℍ𝕀ℕ 𝕊ℍ𝔸ℝ𝕄𝔸")
+
+@bot.message_handler(content_types=['document'])
+def handle_file(m):
+    if not m.document.file_name.endswith('.txt'): return
+    wait = bot.send_message(m.chat.id, "⚡ **Processing with Premium Logic...**")
+    
+    file_info = bot.get_file(m.document.file_id)
+    content = bot.download_file(file_info.file_path).decode('utf-8')
+    
+    v, p = categorize(extract_data(content))
+    html_data = generate_html(m.document.file_name, v, p)
+    
+    out_name = m.document.file_name.replace(".txt", "_@Sachin4Sharma1210.html")
+    with open(out_name, "w", encoding='utf-8') as f: f.write(html_data)
+    
+    with open(out_name, "rb") as f:
+        bot.send_document(m.chat.id, f, caption="✅ **HTML Generated Successfully!**\n\n**OPERATED BY SACHIN SHARMA**")
+    
+    os.remove(out_name)
+    bot.delete_message(m.chat.id, wait.message_id)
+
+if __name__ == "__main__":
+    keep_alive()
+    bot.infinity_polling()
+
         else: o.append((n, u))
     return v, p, o
 
